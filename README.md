@@ -1,0 +1,1 @@
+Election-Manager module for Dr.Abrishami cloud course project 2019
