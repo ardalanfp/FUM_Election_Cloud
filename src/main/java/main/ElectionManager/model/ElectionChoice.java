@@ -1,5 +1,9 @@
 package main.ElectionManager.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
@@ -12,8 +16,9 @@ public class ElectionChoice {
     private  int id;
 
     @ManyToOne
-    @JoinColumn
-    @NotNull
+    @JoinColumn(name = "election_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Election election;
 
     @Column

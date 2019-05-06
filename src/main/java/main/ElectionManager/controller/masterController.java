@@ -1,5 +1,6 @@
 package main.ElectionManager.controller;
 
+import main.ElectionManager.exception.ElectionChoiceNotFound;
 import main.ElectionManager.exception.ElectionNotFoundException;
 import main.ElectionManager.model.Election;
 import main.ElectionManager.model.ElectionChoice;
@@ -8,10 +9,7 @@ import main.ElectionManager.repository.ElectionChoiceRepository;
 import main.ElectionManager.repository.ElectionRepository;
 import main.ElectionManager.repository.ElectionStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.InvalidParameterException;
 import java.util.*;
@@ -111,6 +109,9 @@ public class masterController {
     public Map<String,Object> editElection(@RequestBody Election election){
         Map<String,Object> map = new HashMap<>();
         validateElection(election);
+        if(! electionRepository.findById(election.getId()).isPresent()){
+            throw  new InvalidParameterException();
+        }
         electionRepository.save(election);
         map.put("message","successful");
         return map;
@@ -120,7 +121,7 @@ public class masterController {
     @RequestMapping(value = "/election/choices")
     public Map<String,Object> getListOfChoices(int electionId){
         Map<String,Object> map = new HashMap<>();
-        if (electionRepository.findById(electionId) == null){
+        if (! electionRepository.findById(electionId).isPresent()){
             throw  new InvalidParameterException();
         }
         map.put("data",electionChoiceRepository.findByElectionId(electionId));
@@ -128,13 +129,66 @@ public class masterController {
         return map;
     }
 
-
-    @RequestMapping(value = "/test")
-    public Map<String,Object>  test(){
+    private void validateChoice(ElectionChoice choice) {
+        if (choice.getChoice() == null || choice.getChoice().equals("")){
+            System.out.println("invalid choice given.");
+            throw  new InvalidParameterException();
+        }
+    }
+    @RequestMapping(value = "election/{electionId}/choices/save",method = RequestMethod.POST)
+    public Map<String,Object> createElectionChoice(@PathVariable (value = "electionId") int electionId,
+                                                   @RequestBody ElectionChoice choice){
         Map<String,Object> map = new HashMap<>();
-        Date d = new Date();
-        map.put("message",d);
-        map.put("elec",new Election("N1",new Date(),new Date()));
+        validateChoice(choice);
+        return electionRepository.findById(electionId).map(election -> {
+            choice.setElection(election);
+            electionChoiceRepository.save(choice);
+            map.put("message","successful");
+            return map;
+        }).orElseThrow(() -> new ElectionNotFoundException());
+    }
+
+
+    @RequestMapping(value = "election/{electionId}/choices/{electionChoiceId}/remove")
+    public Map<String,Object> removeElectionChoice(
+            @PathVariable (value = "electionId") int electionId,
+            @PathVariable (value = "electionChoiceId") int electionChoiceId){
+        Map<String,Object> map = new HashMap<>();
+        if(!electionRepository.existsById(electionId)) {
+            throw new ElectionNotFoundException();
+        }
+
+        electionChoiceRepository.deleteById(electionChoiceId);
+        map.put("message","successful");
         return map;
+    }
+
+    @RequestMapping(value = "election/{electionId}/choices/{electionChoiceId}/edit",method = RequestMethod.PUT)
+    public Map<String,Object> editElectionChoice(
+            @PathVariable (value = "electionId") int electionId,
+            @PathVariable (value = "electionChoiceId") int electionChoiceId,
+            @RequestBody ElectionChoice choice){
+        Map<String,Object> map = new HashMap<>();
+        validateChoice(choice);
+
+        if(!electionRepository.existsById(electionId)) {
+            throw new ElectionNotFoundException();
+        }
+
+        return electionChoiceRepository.findById(electionChoiceId).map(c -> {
+            c.setChoice(choice.getChoice());
+            electionChoiceRepository.save(c);
+            map.put("message","successful");
+            return map;
+        }).orElseThrow(() -> new ElectionChoiceNotFound());
+
+
+    }
+
+
+
+
+    @RequestMapping(value = "/heartbeat")
+    public void  heartbeat(){
     }
 }
