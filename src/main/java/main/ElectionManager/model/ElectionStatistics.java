@@ -1,6 +1,8 @@
 package main.ElectionManager.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import javax.persistence.*;
 
 @Entity
@@ -12,6 +14,7 @@ public class ElectionStatistics {
     }
 
     @Id
+    @JsonIgnore
     private int id = 1;
 
 

@@ -104,8 +104,8 @@ public class masterController {
     }
 
 
-    @RequestMapping(value = "/elections/remove")
-    public Map<String,Object> removeElection(int electionId){
+    @RequestMapping(value = "/elections/{electionId}/remove")
+    public Map<String,Object> removeElection(@PathVariable (value = "electionId") int electionId){
         Map<String,Object> map = new HashMap<>();
         electionRepository.deleteById(electionId);
         map.put("message","successful");
@@ -145,7 +145,7 @@ public class masterController {
     }
 
 
-    @RequestMapping(value = "election/{electionId}/choices/save",method = RequestMethod.POST)
+    @RequestMapping(value = "elections/{electionId}/choices/save",method = RequestMethod.POST)
     public Map<String,Object> createElectionChoice(@PathVariable (value = "electionId") int electionId,
                                                    @RequestBody ElectionChoice choice){
         Map<String,Object> map = new HashMap<>();
@@ -159,7 +159,7 @@ public class masterController {
     }
 
 
-    @RequestMapping(value = "election/{electionId}/choices/{electionChoiceId}/remove")
+    @RequestMapping(value = "elections/{electionId}/choices/{electionChoiceId}/remove")
     public Map<String,Object> removeElectionChoice(
             @PathVariable (value = "electionId") int electionId,
             @PathVariable (value = "electionChoiceId") int electionChoiceId){
@@ -174,7 +174,7 @@ public class masterController {
     }
 
 
-    @RequestMapping(value = "election/{electionId}/choices/{electionChoiceId}/edit",method = RequestMethod.PUT)
+    @RequestMapping(value = "elections/{electionId}/choices/{electionChoiceId}/edit",method = RequestMethod.PUT)
     public Map<String,Object> editElectionChoice(
             @PathVariable (value = "electionId") int electionId,
             @PathVariable (value = "electionChoiceId") int electionChoiceId,
@@ -197,6 +197,23 @@ public class masterController {
     }
 
 
+    @RequestMapping(value="elections/{electionId}/choices/{electionChoiceId}/get")
+    public Map<String,Object> getElectionChoiceDetail(
+            @PathVariable (value = "electionId") int electionId,
+            @PathVariable (value = "electionChoiceId") int electionChoiceId){
+
+        Map<String,Object> map = new HashMap<>();
+
+        if(!electionRepository.existsById(electionId)) {
+            throw new ElectionNotFoundException();
+        }
+
+        return electionChoiceRepository.findById(electionChoiceId).map(c -> {
+            map.put("data", c);
+            map.put("message","successful");
+            return map;
+        }).orElseThrow(() -> new ElectionChoiceNotFound());
+    }
 
 
     @RequestMapping(value = "/heartbeat")
