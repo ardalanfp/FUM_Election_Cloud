@@ -174,7 +174,7 @@ public class masterController {
     }
 
 
-    @RequestMapping(value = "elections/{electionId}/choices/{electionChoiceId}/edit",method = RequestMethod.PUT)
+    @RequestMapping(value = "elections/{electionId}/choices/{electionChoiceId}/update",method = RequestMethod.PUT)
     public Map<String,Object> editElectionChoice(
             @PathVariable (value = "electionId") int electionId,
             @PathVariable (value = "electionChoiceId") int electionChoiceId,
