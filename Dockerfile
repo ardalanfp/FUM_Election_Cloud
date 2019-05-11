@@ -13,4 +13,4 @@ RUN  mvn install
 EXPOSE 8080
 
 # Run the jar file
-ENTRYPOINT ["java","-jar","/master-1.0-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","/home/app/target/ElectionManager-1.0-SNAPSHOT.jar"]
