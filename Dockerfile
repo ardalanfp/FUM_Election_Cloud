@@ -1,5 +1,5 @@
 # Start with a base image containing Java runtime
-FROM zenika/alpine-maven
+FROM maven
 
 # Add Maintainer Info
 LABEL maintainer="aforoughipour@gmail.com"
